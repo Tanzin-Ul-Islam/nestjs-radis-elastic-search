@@ -12,5 +12,13 @@ export class ProductRepository extends BaseRepository<Product> {
   ) {
     super(productModel);
   }
-
+  async findProductByAttributes(id) {
+    const product = await this.productModel
+      .findOne({ _id: id })
+      .populate('category')
+      .populate('brand')
+      .populate('color')
+      .exec();
+    return product;
+  }
 }

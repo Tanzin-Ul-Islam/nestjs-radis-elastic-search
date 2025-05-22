@@ -7,7 +7,7 @@ import { Category } from './schemas/category.schema';
 import { Types } from 'mongoose';
 import { RedisService } from 'src/services/redis/redis.service';
 import { CACHE_KEYS } from 'src/constants/cache-keys';
-import { categoryInterface } from 'src/interface/category.interface';
+import { resuletInterface } from 'src/interface/result.interface';
 
 @Injectable()
 export class CategoryService {
@@ -29,8 +29,8 @@ export class CategoryService {
       }
       const newCategory = (await this.categoryRepository.create(
         createCategoryDto,
-      )) as categoryInterface;
-      await this.clearAndCacheSingleCategory(
+      )) as resuletInterface;
+      await this.clearAndCacheSingleEntity(
         newCategory._id.toString(),
         newCategory,
       );
@@ -40,7 +40,7 @@ export class CategoryService {
         HttpStatus.CREATED,
       );
     } catch (error) {
-      return this.handleGenericError(error, 'creating');
+      return ResponseUtils.handleGenericError(error, 'creating category');
     }
   }
 
@@ -59,7 +59,7 @@ export class CategoryService {
       await this.redisService.set(CACHE_KEYS.CATEGORY.ALL, categories);
       return ResponseUtils.handleSuccess<Category[]>(categories);
     } catch (error) {
-      return this.handleGenericError(error, 'fetching');
+      return ResponseUtils.handleGenericError(error, 'fetching categories');
     }
   }
 
@@ -81,7 +81,7 @@ export class CategoryService {
       await this.redisService.set(CACHE_KEYS.CATEGORY.ONE(id), category, 3600);
       return ResponseUtils.handleSuccess<Category>(category);
     } catch (error) {
-      return this.handleGenericError(error, 'fetching');
+      return ResponseUtils.handleGenericError(error, 'fetching category');
     }
   }
 
@@ -99,13 +99,13 @@ export class CategoryService {
       if (!result)
         return ResponseUtils.handleNotFound<Category>('Category not found.');
       await this.redisService.del(CACHE_KEYS.CATEGORY.ONE(id));
-      await this.clearAndCacheSingleCategory(id, result);
+      await this.clearAndCacheSingleEntity(id, result);
       return ResponseUtils.handleSuccess<Category>(
         result,
         'Category updated successfully.',
       );
     } catch (error) {
-      return this.handleGenericError(error, 'updating');
+      return ResponseUtils.handleGenericError(error, 'updating category');
     }
   }
 
@@ -124,22 +124,15 @@ export class CategoryService {
         'Category deleted successfully.',
       );
     } catch (error) {
-      return this.handleGenericError(error, 'deleting');
+      return ResponseUtils.handleGenericError(error, 'deleting category');
     }
   }
 
-  private async clearAndCacheSingleCategory(
+  private async clearAndCacheSingleEntity(
     id: string,
     data: unknown,
   ): Promise<void> {
     await this.redisService.del(CACHE_KEYS.CATEGORY.ALL);
     await this.redisService.set(CACHE_KEYS.CATEGORY.ONE(id), data);
-  }
-
-  private handleGenericError<T>(error: any, operation: string): ApiResponse<T> {
-    return ResponseUtils.handleError<T>(
-      error,
-      `An error occurred while ${operation} category.`,
-    );
   }
 }

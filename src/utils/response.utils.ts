@@ -102,4 +102,11 @@ export class ResponseUtils {
       data: undefined,
     });
   }
+
+  static handleGenericError<T>(error: any, operation: string): ApiResponse<T> {
+    return ResponseUtils.handleError<T>(
+      error,
+      `An error occurred while ${operation}.`,
+    );
+  }
 }

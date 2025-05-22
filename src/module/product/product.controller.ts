@@ -12,10 +12,12 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ApiResponse } from 'src/utils/response.utils';
 import { Product } from './schemas/product.schema';
+import { FilterProductDto } from './dto/filter-product.dto';
+import { productFilterResultInterface } from 'src/interface/result.interface';
 
 @Controller('product')
 export class ProductController {
-  constructor(private readonly productService: ProductService) { }
+  constructor(private readonly productService: ProductService) {}
 
   @Post()
   async create(
@@ -25,8 +27,11 @@ export class ProductController {
   }
 
   @Get()
-  async findAll(): Promise<ApiResponse<Product[]>> {
-    return await this.productService.findAll();
+  async findAll(
+    @Body() filter: FilterProductDto,
+  ): Promise<ApiResponse<productFilterResultInterface>> {
+    console.log(filter);
+    return await this.productService.findAll(filter);
   }
 
   @Get(':id')

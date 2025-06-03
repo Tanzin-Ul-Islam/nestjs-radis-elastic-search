@@ -30,7 +30,6 @@ export class ProductController {
   async findAll(
     @Body() filter: FilterProductDto,
   ): Promise<ApiResponse<productFilterResultInterface>> {
-    console.log(filter);
     return await this.productService.findAll(filter);
   }
 

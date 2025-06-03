@@ -55,15 +55,25 @@ export class ProductService {
       } = filter;
 
       const filterQuery: Record<string, any> = {};
+
       if (searchKey) filterQuery.name = { $regex: searchKey, $options: 'i' };
-      if (category) filterQuery.category = new Types.ObjectId(category);
-      if (brand) filterQuery.brand = new Types.ObjectId(brand);
-      if (color) filterQuery.color = new Types.ObjectId(color);
+
+      // Only add category if it's a non-empty string
+      if (category && category.trim())
+        filterQuery.category = new Types.ObjectId(category);
+
+      // Only add brand if it's a non-empty string
+      if (brand && brand.trim()) filterQuery.brand = new Types.ObjectId(brand);
+
+      // Only add color if it's a non-empty string
+      if (color && color.trim()) filterQuery.color = new Types.ObjectId(color);
+
       if (minPrice !== undefined || maxPrice !== undefined) {
         filterQuery.price = {};
         if (minPrice !== undefined) filterQuery.price.$gte = minPrice;
         if (maxPrice !== undefined) filterQuery.price.$lte = maxPrice;
       }
+
       const sort: Record<string, 1 | -1> = {
         [sortBy]: sortOrder === SortOrder.ASC ? 1 : -1,
       };
@@ -74,7 +84,7 @@ export class ProductService {
         limit,
         sort,
       });
-      console.log('res', res);
+
       return ResponseUtils.handleSuccess<productFilterResultInterface>(res);
     } catch (error) {
       return ResponseUtils.handleGenericError<productFilterResultInterface>(
@@ -83,6 +93,53 @@ export class ProductService {
       );
     }
   }
+
+  // async findAll(
+  //   filter: FilterProductDto,
+  // ): Promise<ApiResponse<productFilterResultInterface>> {
+  //   try {
+  //     const {
+  //       searchKey,
+  //       color,
+  //       category,
+  //       brand,
+  //       minPrice,
+  //       maxPrice,
+  //       sortBy = 'createdAt',
+  //       sortOrder = SortOrder.DESC,
+  //       page = 1,
+  //       limit = 10,
+  //     } = filter;
+
+  //     const filterQuery: Record<string, any> = {};
+  //     if (searchKey) filterQuery.name = { $regex: searchKey, $options: 'i' };
+  //     if (category) filterQuery.category = new Types.ObjectId(category);
+  //     if (brand) filterQuery.brand = new Types.ObjectId(brand);
+  //     if (color) filterQuery.color = new Types.ObjectId(color);
+  //     if (minPrice !== undefined || maxPrice !== undefined) {
+  //       filterQuery.price = {};
+  //       if (minPrice !== undefined) filterQuery.price.$gte = minPrice;
+  //       if (maxPrice !== undefined) filterQuery.price.$lte = maxPrice;
+  //     }
+  //     const sort: Record<string, 1 | -1> = {
+  //       [sortBy]: sortOrder === SortOrder.ASC ? 1 : -1,
+  //     };
+  //     console.log('filterQuery', filterQuery);
+  //     const res = await this.productRepository.findWithPagination({
+  //       filterQuery,
+  //       page,
+  //       limit,
+  //       sort,
+  //     });
+  //     console.log('res', res);
+  //     return ResponseUtils.handleSuccess<productFilterResultInterface>(res);
+  //   } catch (error) {
+  //     return ResponseUtils.handleGenericError<productFilterResultInterface>(
+  //       error,
+  //       'fetching product',
+  //     );
+  //   }
+  // }
 
   async findOne(id: string): Promise<ApiResponse<Product>> {
     try {

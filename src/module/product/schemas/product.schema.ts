@@ -9,13 +9,18 @@ export class Product extends AbstractDocument {
   name: string;
 
   @Prop({ type: Types.ObjectId, ref: 'Category', required: true })
-  category: string;
+  category: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: 'Brand', required: true })
-  brand: string;
+  brand: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'Color', required: true })
-  color: string;
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'Color',
+    required: false,
+    default: null,
+  })
+  color: Types.ObjectId;
 
   @Prop({ required: true })
   price: number;

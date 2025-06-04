@@ -26,7 +26,15 @@ export class ProductService {
       if (product) {
         return ResponseUtils.handleConflict<Product>('Product already exists.');
       }
-      const newProduct = await this.productRepository.create(createProductDto);
+      const payload = {
+        ...createProductDto,
+        category: new Types.ObjectId(createProductDto.category),
+        brand: new Types.ObjectId(createProductDto.brand),
+        color: createProductDto?.color
+          ? new Types.ObjectId(createProductDto?.color)
+          : undefined,
+      };
+      const newProduct = await this.productRepository.create(payload);
       await this.redisService.del(CACHE_KEYS.PRODUCT.ALL);
       return ResponseUtils.handleSuccess<Product>(newProduct);
     } catch (error) {
